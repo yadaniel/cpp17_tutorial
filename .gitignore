@@ -1,0 +1,5 @@
+*_gcc
+*_clang
+*.orig
+tags
+
