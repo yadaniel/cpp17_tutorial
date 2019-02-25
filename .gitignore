@@ -1,5 +1,6 @@
 *_gcc
 *_clang
 *.orig
+*.stackdump
 tags
 
