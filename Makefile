@@ -29,15 +29,11 @@ all: $(objs)
 
 %.o: %.cpp
 	@echo "compiling" $<
+	@# just compile using GCC, so .o is created from .cpp and make will use timestamp for this file
+	@$(GCC) -c $< $(CXXFLAGS) -std=c++17
 	$(GCC) -o $<_gcc $< $(CXXFLAGS) -std=c++17
 	$(CLANG) -o $<_clang $< $(CXXFLAGS) -stdlib=libc++ -std=c++17
 
-# GCC:
-	# $(GCC) -o main_gcc main.cpp $(CXXFLAGS) -std=c++17
-
-# CLANG:
-	# $(CLANG) -o main_clang main.cpp $(CXXFLAGS) -stdlib=libc++ -std=c++17
-
 clean:
-	rm -f *_gcc *_clang *.orig
+	rm -f *.o *_gcc *_clang *.orig *.stackdump
 
