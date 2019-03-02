@@ -32,27 +32,108 @@ void test1() {
         // std::regex pattern(R"(\w+)=(\d+)",
         // gcc will throw "Unexpected escape character"
         // clang will throw "An empty regex is not allowed in the POSIX grammar"
-        std::regex pattern(R"(\\w+)=(\\d+)",
-                           std::regex::grep |
+        // std::regex pattern(R"(\w+)=(\d+)",
+        // std::regex pattern(R"([a-z]+)=([0-9]+)",     // regex error OR mismatched () exception
+        std::regex pattern("([a-z]+)=([0-9]+)",
+                           std::regex::awk |         // works
+                           // std::regex::grep |
+                           // std::regex::egrep |       // works
+                           // std::regex::basic |
+                           // std::regex::extended |    // works
                            std::regex::icase
-                           // std::regex::multiline |
-                           // std::regex::optimized
+                           // std::regex::multiline |   // not compiling
+                           // std::regex::optimized     // not compiling
                           );
 
         std::cmatch m1, m2;
         bool b1 = std::regex_match("x=123", m1, pattern);
         bool b2 = std::regex_search("x=123", m2, pattern);
+        std::cout << std::boolalpha << "match=" << b1 << ", search=" << b2 << std::endl;
 
-        std::cout << std::boolalpha;    // ok, set stream flag before << b1 and b2
-        std::cout << "match=" << b1 << ", search=" << b2 << std::endl;
+        if(b1) {
+            std::cout << "b1" << std::endl;
+            std::cout << m1[0] << std::endl;
+            std::cout << m1[1] << std::endl;
+            std::cout << m1[2] << std::endl;
+        }
+
+        if(b2) {
+            std::cout << "b2" << std::endl;
+            std::cout << m2[0] << std::endl;
+            std::cout << m2[1] << std::endl;
+            std::cout << m2[2] << std::endl;
+        }
+
+        std::smatch m3, m4;
+        std::string line{"x=123"};
+        bool b3 = std::regex_match(line, m3, pattern);
+        bool b4 = std::regex_search(line, m4, pattern);
+        std::cout << std::boolalpha << "match=" << b3 << ", search=" << b3 << std::endl;
+
+        if(b3) {
+            std::cout << "b3" << std::endl;
+            std::cout << m3[0] << std::endl;
+            std::cout << m3[1] << std::endl;
+            std::cout << m3[2] << std::endl;
+        }
+
+        if(b4) {
+            std::cout << "b4" << std::endl;
+            std::cout << m4[0] << std::endl;
+            std::cout << m4[1] << std::endl;
+            std::cout << m4[2] << std::endl;
+        }
+
+
+        //
+        std::cout << std::boolalpha;    // ok, set stream flag before << true and false
+        std::cout << "true=" << true << ", false=" << false << std::endl;
+
     } catch(std::exception & exc) {
         std::cout << "catched: " << exc.what() << std::endl;
     }
 }
 
+void test2() {
+    std::string text = "x=1, y=10, z=100";
+    std::regex pattern("[a-z]+=[0-9]+");
+    std::sregex_iterator next(text.begin(), text.end(), pattern);
+    std::sregex_iterator end;
+    while(next != end) {
+        std::smatch m {*next};
+        std::cout << m.str() << std::endl;
+        next++;
+    }
+}
+
+void test3() {
+    std::string text = "x=1, y=10, z=100";
+    std::regex pattern("([a-z]+)=([0-9]+)");
+    std::sregex_iterator next(text.begin(), text.end(), pattern);
+    std::sregex_iterator end;
+    while(next != end) {
+        std::smatch m {*next};
+        std::cout << m.str() << std::endl;
+        std::cout << m.str(0) << std::endl;
+        std::cout << m.str(1) << std::endl;
+        std::cout << m.str(2) << std::endl;
+        if(m.str(3) == "") {
+            std::cout << "non existing group 3 is empty" << std::endl;
+        }
+        try {
+            std::cout << m.str(3) << std::endl;
+        } catch (...) {
+            std::cout << "no group 3" << std::endl;
+        }
+        next++;
+    }
+}
+
 int main() {
-    test1();
-    assert_example(10);
+    // test1();
+    // test2();
+    test3();
+    // assert_example(10);
     return 0;
 }
 
