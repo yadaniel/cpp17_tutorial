@@ -26,6 +26,7 @@ deps := $(srcs:.cpp=.d)
 
 all: $(objs)
 	@echo $(objs)
+	@echo
 
 %.o: %.cpp
 	@echo "compiling" $<
