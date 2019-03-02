@@ -38,9 +38,11 @@ void test1() {
                            // std::regex::multiline |
                            // std::regex::optimized
                           );
+
         std::cmatch m1, m2;
         bool b1 = std::regex_match("x=123", m1, pattern);
         bool b2 = std::regex_search("x=123", m2, pattern);
+
         std::cout << std::boolalpha;    // ok, set stream flag before << b1 and b2
         std::cout << "match=" << b1 << ", search=" << b2 << std::endl;
     } catch(std::exception & exc) {
