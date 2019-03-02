@@ -129,10 +129,35 @@ void test3() {
     }
 }
 
+void test4() {
+    const char * text = "x=1, y=10, z=100";
+    int len = strlen(text);
+    std::regex pattern("([a-z]+)=([0-9]+)");
+    std::cregex_iterator next(&text[0], &text[len], pattern);
+    std::cregex_iterator end;
+    while(next != end) {
+        std::cmatch m {*next};
+        std::cout << m.str() << std::endl;
+        std::cout << m.str(0) << std::endl;
+        std::cout << m.str(1) << std::endl;
+        std::cout << m.str(2) << std::endl;
+        if(m.str(3) == "") {
+            std::cout << "non existing group 3 is empty" << std::endl;
+        }
+        try {
+            std::cout << m.str(3) << std::endl;
+        } catch (...) {
+            std::cout << "no group 3" << std::endl;
+        }
+        next++;
+    }
+}
+
 int main() {
     // test1();
     // test2();
-    test3();
+    // test3();
+    test4();
     // assert_example(10);
     return 0;
 }
