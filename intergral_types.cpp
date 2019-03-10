@@ -2,6 +2,11 @@
 #include <iomanip>
 #include <cassert>
 #include <typeinfo>     // typeid
+#include <climits>
+#include <type_traits>
+
+// interger promotion rules
+// default argument promotion rules for functions with unprototyped arguments (function with ellispis)
 
 using namespace std;
 
@@ -51,16 +56,19 @@ uint16_t test1() {
 
 void test2() {
     // using signed and unsigned types in same expression
-    // rule1: when signed and unsigned types of the same rank are used together, then signed values are casted to unsigned (unsigned wins)
-    // rule2: when ranks are different, then values of the lower rank are casted to higher ranked type, if all values can be represented
-    // if higher ranked type cannot represent all values of lower ranked type, then unsigned version of the higher ranked type is used
-
-    // rule1
-    // u16 = 1;
-    // i16 = -1;
-    // step1: u16 and i16 of the same rank => -1 casted to uint16_t => 0xFFFF
-    // step2: 0xFFFF + 0x0001 => 0x10000
-    // step3: 0x10000 & 0xFFFF => 0x0000 ... modulo conversion
+    // integer promotion rule:
+    //        integer types smaller than int (short, char) are promoted when an operation is performed on them.
+    //        If all values of smaller type can be represented in int, then the value of smaller type is converted to int.
+    //        Otherwise the value of the smaller type is converted to unsigned int.
+    // arithmetic conversion rule:
+    //        conversion takes place after integer promotion has been applied
+    //        the types of promoted values of the operands must yield common type for the operation result
+    //        if both operands have same type, then no further conversion is required
+    //        if both operands are of the same integer type (all signed or all unsigned, but with different ranks), then the operand with the type of lesser integer rank is converted to the type of the operand with greater rank.
+    //        if the operand that has unsigned integer type has rank greater than or equal to the rank of the type of the other (signed) operand, then the operand with signed integer type is converted to the type of the operand with unsigned integer type.
+    //        if the type of the operand with signed integer type can represent all of the values of the type of the operand with unsigned integer type, then the operand with unsigned integer type is converted to the type of the operand with signed integer type,
+    //        if the type of the operand with signed integer type cannot represent all of the values of the type of the operand with unsgiend integer type, then both operands are converted to the unsigned integer type corresponding to the type of the operand with signed integer type.
+    //        TODO: lookup the defintion of type rank
 
     cout << string(35,'*') << " type letters " << string(35,'*') << endl;
     cout << "uint8_t => " << typeid(uint8_t).name() << endl;    // h
@@ -74,23 +82,22 @@ void test2() {
     cout << string(84, '*') << endl;
 
     {
-        // rule1
         uint8_t u8 {1};
         int8_t i8 {-2};
-        uint8_t res1 = i8 + u8;
-        int8_t res2 = i8 + u8;
-        cout << static_cast<uint16_t>(res1) << "..." << static_cast<uint16_t>(res2) << "..." << static_cast<uint16_t>(i8 + u8) << endl;  // 255...65535...65535
+        uint8_t res1 = i8 + u8;     // i8,u8 promoted to int, then casted to uint8_t
+        int8_t res2 = i8 + u8;      // i8,u8 promoted to int, then casted to int8_t
+        cout << static_cast<uint16_t>(res1) << "..." << static_cast<uint16_t>(res2)
+             << "..." << static_cast<uint16_t>(i8 + u8) << endl;  // 255...65535...65535
         cout << typeid(decltype(i8 + u8)).name() << endl; // i
         cout << typeid(res1).name() << endl; // h
         cout << typeid(res2).name() << endl; // a
     }
 
     {
-        // rule1
         uint16_t u16 {1};
         int16_t i16 {-2};
-        uint16_t res1 = i16 + u16;
-        int16_t res2 = i16 + u16;
+        uint16_t res1 = i16 + u16;  // i16,u16 promoted to int, then casted to uint16_t
+        int16_t res2 = i16 + u16;   // i16,u16 promoted to int, then casted to int16_t
         cout << res1 << "..." << res2 << "..." << i16 + u16 << endl;  // 65535 ... -1 ... -1
         cout << typeid(decltype(i16 + u16)).name() << endl; // i
         cout << typeid(res1).name() << endl; // t
@@ -98,11 +105,10 @@ void test2() {
     }
 
     {
-        // rule1
         uint32_t u32 {1};
         int32_t i32 {-2};
-        uint32_t res1 = i32 + u32;
-        int32_t res2 = i32 + u32;
+        uint32_t res1 = i32 + u32;  // u32 NOT promoted to int, i32 promoted to unsigned int
+        int32_t res2 = i32 + u32;   // u32 NOT promoted to int, i32 promoted to unsigned int
         cout << res1 << "..." << res2 << "..." << i32 + u32 << endl;    // 4294967295...-1...4294967295
         cout << typeid(decltype(i32 + u32)).name() << endl; // j
         cout << typeid(res1).name() << endl; // j
@@ -110,11 +116,10 @@ void test2() {
     }
 
     {
-        // rule1
         uint64_t u64 {1};
         int64_t i64 {-2};
-        uint64_t res1 = i64 + u64;
-        int64_t res2 = i64 + u64;
+        uint64_t res1 = i64 + u64;  // u64 NOT promoted to int, u64 promoted to unsigned long long
+        int64_t res2 = i64 + u64;   // u64 NOT promoted to int, u64 promoted to unsigned long long
         cout << res1 << "..." << res2 << "..." << i64 + u64 << endl;    // 18446744073709551615...-1...18446744073709551615
         cout << typeid(decltype(i64 + u64)).name() << endl; // m
         cout << typeid(res1).name() << endl; // m
@@ -127,10 +132,145 @@ void test2() {
     // typeid is run-time construct
 }
 
+template<typename T>
+void type(std::string t) {
+
+    int size = ((t.size() / 10) + 1) * 10;
+    t.resize(size, ' ');
+
+    if constexpr(std::is_same<T,int8_t>() || std::is_same<T,uint8_t>()) {
+        cout << t << typeid(T).name() << ", "
+             << "min=" << static_cast<int16_t>(std::numeric_limits<T>::min()) << ", "
+             << "max=" << static_cast<int16_t>(std::numeric_limits<T>::max()) <<  endl;
+    } else {
+        cout << t << typeid(T).name() << ", "
+             << "min=" << std::numeric_limits<T>::min() << ", "
+             << "max=" << std::numeric_limits<T>::max() <<  endl;
+    }
+}
+
+void test3() {
+    type<int8_t>(string("int8_t"));
+    type<int16_t>(string("int16_t"));
+    type<int32_t>(string("int32_t"));
+    type<int64_t>(string("int64_t"));
+    type<uint8_t>(string("uint8_t"));
+    type<uint16_t>(string("uint16_t"));
+    type<uint32_t>(string("uint32_t"));
+    type<uint64_t>(string("uint64_t"));
+
+    // show types of expressions
+    int8_t i8;
+    int16_t i16;
+    int32_t i32;
+    int64_t i64;
+
+    uint8_t u8;
+    uint16_t u16;
+    uint32_t u32;
+    uint64_t u64;
+
+    type<decltype(u8)>(string("decltype(u8)"));         // uint8_t
+    type<decltype(!u8)>(string("decltype(!u8)"));       // bool
+    type<decltype(~u8)>(string("decltype(~u8)"));       // int
+    type<decltype(+u8)>(string("decltype(+u8)"));       // int
+    type<decltype(-u8)>(string("decltype(-u8)"));       // int
+    type<decltype(u8+0)>(string("decltype(u8+0)"));     // int
+    type<decltype(u8-0)>(string("decltype(u8-0)"));     // int
+    type<decltype(u8*1)>(string("decltype(u8*1)"));     // int
+    type<decltype(u8/1)>(string("decltype(u8/1)"));     // int
+    type<decltype(u8>>0)>(string("decltype(u8>>0)"));   // int
+    type<decltype(u8<<0)>(string("decltype(u8<<0)"));   // int
+    type<decltype(u8 & 0xFF)>(string("decltype(u8 & 0xFF)"));   // int
+    type<decltype(u8 | 0x00)>(string("decltype(u8 | 0x00)"));   // int
+    type<decltype(u8 ^ 0x00)>(string("decltype(u8 ^ 0x00)"));   // int
+    // type<decltype(u8 && 0xFF)>(string("decltype(u8 && 0xFF)"));   // bool ... compiler warning
+    // type<decltype(u8 || 0x00)>(string("decltype(u8 || 0x00)"));   // bool ... compiler warning
+    type<decltype(u8 && true)>(string("decltype(u8 && true)"));   // bool
+    type<decltype(u8 || false)>(string("decltype(u8 || false)"));   // bool
+    type<decltype(u8+0ul)>(string("decltype(u8+0ul)")); // unsigned long long
+    type<decltype(u8-0ul)>(string("decltype(u8-0ul)")); // unsigned long long
+    type<decltype(u8*1ul)>(string("decltype(u8*1ul)")); // unsigned long long
+    type<decltype(u8/1ul)>(string("decltype(u8/1ul)")); // unsigned long long
+    type<decltype(u8>>0ul)>(string("decltype(u8>>0ul)")); // int
+    type<decltype(u8<<0ul)>(string("decltype(u8<<0ul)")); // int
+
+    // note: when calling printf("%f", 32.0f) or printf("%x", 'x')
+    // the double and integer promotion happens before printf is called
+    // thus it is not possible to pass float and char unpromoted to printf function
+}
+
+void test4() {
+    // make_unsigned
+    using _uint8_t = std::make_unsigned<int8_t>::type;
+    using _uint16_t = std::make_unsigned<int16_t>::type;
+    using _uint32_t = std::make_unsigned<int32_t>::type;
+    using _uint64_t = std::make_unsigned<int64_t>::type;
+    static_assert(std::is_same<_uint8_t, uint8_t>());
+    static_assert(std::is_same<_uint16_t, uint16_t>());
+    static_assert(std::is_same<_uint32_t, uint32_t>());
+    static_assert(std::is_same<_uint64_t, uint64_t>());
+    // make_signed
+    using _int8_t = std::make_signed<uint8_t>::type;
+    using _int16_t = std::make_signed<uint16_t>::type;
+    using _int32_t = std::make_signed<uint32_t>::type;
+    using _int64_t = std::make_signed<uint64_t>::type;
+    static_assert(std::is_same<_int8_t, int8_t>());
+    static_assert(std::is_same<_int16_t, int16_t>());
+    static_assert(std::is_same<_int32_t, int32_t>());
+    static_assert(std::is_same<_int64_t, int64_t>());
+    // is_unsigned
+    static_assert(std::is_unsigned<uint8_t>());
+    static_assert(std::is_unsigned<uint16_t>());
+    static_assert(std::is_unsigned<uint32_t>());
+    static_assert(std::is_unsigned<uint64_t>());
+    // is_signed
+    static_assert(std::is_signed<int8_t>());
+    static_assert(std::is_signed<int16_t>());
+    static_assert(std::is_signed<int32_t>());
+    static_assert(std::is_signed<int64_t>());
+
+    // ...
+    static_assert(std::is_unsigned<bool>());    // bool is unsigned
+    // static_assert(std::is_signed<bool>());
+    // static_assert(std::is_unsigned<float>());
+    // static_assert(std::is_unsigned<double>());
+    // static_assert(std::is_unsigned<long double>());
+    static_assert(std::is_signed<float>());         // float is signed
+    static_assert(std::is_signed<double>());        // double is signed
+    static_assert(std::is_signed<long double>());   // long double is signed
+
+    // is_integral
+    static_assert(std::is_integral<uint8_t>());
+    static_assert(std::is_integral<uint16_t>());
+    static_assert(std::is_integral<uint32_t>());
+    static_assert(std::is_integral<uint64_t>());
+    static_assert(std::is_integral<int8_t>());
+    static_assert(std::is_integral<int16_t>());
+    static_assert(std::is_integral<int32_t>());
+    static_assert(std::is_integral<int64_t>());
+    static_assert(std::is_integral<bool>());        // bool is integral
+    // static_assert(std::is_integral<float>());
+    // static_assert(std::is_integral<double>());
+    // static_assert(std::is_integral<long double>());
+    static_assert(std::is_floating_point<float>());
+    static_assert(std::is_floating_point<double>());
+    static_assert(std::is_floating_point<long double>());
+
+    // TODO: is_arithmetic
+    // TODO: is_fundamental
+
+    // show at runtime
+    cout << "is uint32_t unsigned? -> " << std::is_unsigned<uint32_t>::value << endl;
+
+}
+
 int main() {
     using_assert();
     (void)test1();  // explicit ignore [[nodiscard]] attributed return value
-    test2();
+    // test2();
+    test3();
+    test4();
     return 0;
 }
 
