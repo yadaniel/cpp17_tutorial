@@ -265,12 +265,96 @@ void test4() {
 
 }
 
+void test5() {
+    cout << "test5" << endl;
+
+    // as static asserts ... uint8_t and ints of different rank
+    static_assert(is_same<decltype(uint8_t(0)+int8_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+int16_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+int32_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+int64_t(0)),int64_t>());
+    // as static asserts ... uint8_t and uints of different rank
+    static_assert(is_same<decltype(uint8_t(0)+uint8_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+uint16_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+uint32_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint8_t(0)+uint64_t(0)),uint64_t>());
+
+    // as static asserts ... uint16_t and ints of different rank
+    static_assert(is_same<decltype(uint16_t(0)+int8_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+int16_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+int32_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+int64_t(0)),int64_t>());
+    // as static asserts ... uint16_t and uints of different rank
+    static_assert(is_same<decltype(uint16_t(0)+uint8_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+uint16_t(0)),int32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+uint32_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint16_t(0)+uint64_t(0)),uint64_t>());
+
+    // as static asserts ... uint32_t and ints of different rank
+    static_assert(is_same<decltype(uint32_t(0)+int8_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+int16_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+int32_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+int64_t(0)),int64_t>());
+    // as static asserts ... uint32_t and uints of different rank
+    static_assert(is_same<decltype(uint32_t(0)+uint8_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+uint16_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+uint32_t(0)),uint32_t>());
+    static_assert(is_same<decltype(uint32_t(0)+uint64_t(0)),uint64_t>());
+
+    // as static asserts ... uint64_t and ints of different rank
+    static_assert(is_same<decltype(uint64_t(0)+int8_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+int16_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+int32_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+int64_t(0)),uint64_t>());
+    // as static asserts ... uint64_t and uints of different rank
+    static_assert(is_same<decltype(uint64_t(0)+uint8_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+uint16_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+uint32_t(0)),uint64_t>());
+    static_assert(is_same<decltype(uint64_t(0)+uint64_t(0)),uint64_t>());
+
+    // float
+    static_assert(is_same<decltype(float(0)+uint8_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+uint16_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+uint32_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+uint64_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+int8_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+int16_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+int32_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+int64_t(0)),float>());
+    static_assert(is_same<decltype(float(0)+float(0)),float>());
+    static_assert(is_same<decltype(float(0)+double(0)),double>());
+    static_assert(is_same<decltype(float(0)+(long double)0),long double>());
+    // double
+    static_assert(is_same<decltype(double(0)+uint8_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+uint16_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+uint32_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+uint64_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+int8_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+int16_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+int32_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+int64_t(0)),double>());
+    static_assert(is_same<decltype(double(0)+double(0)),double>());
+    static_assert(is_same<decltype(double(0)+(long double)0),long double>());
+    // long double
+    static_assert(is_same<decltype((long double)0+uint8_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+uint16_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+uint32_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+uint64_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+int8_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+int16_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+int32_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+int64_t(0)),long double>());
+    static_assert(is_same<decltype((long double)0+(long double)0),long double>());
+
+}
+
 int main() {
     using_assert();
     (void)test1();  // explicit ignore [[nodiscard]] attributed return value
     // test2();
     test3();
     test4();
+    test5();
     return 0;
 }
 
