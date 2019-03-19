@@ -28,6 +28,10 @@ void test_string() {
     // typedef wstring = basis_string<wchar>
     string s;
     wstring ws;
+
+    // string conversion
+    string strVal = std::to_string(12345);
+    int intVal = std::stoi(strVal);
 }
 
 void test_vector() {
@@ -125,6 +129,15 @@ void test_set() {
 }
 
 void test_map() {
+    std::map<uint16_t, std::string> m;
+    m[1] = "1";
+    m[2] = "2";
+    m[3] = "3";
+    m[4] = "4";
+    m[5] = "5";
+    for(auto & [key,value] : m) {
+        cout << "map[" << key << "] = " << value << endl;
+    }
 }
 
 void test_queue() {
@@ -189,18 +202,18 @@ void test_hex() {
 }
 
 int main() {
-    test_vector_bool();
-    test_vector();
-    test_deque();
-    test_string();
-    test_queue();
-    test_list();
-    test_stack();
-    test_set();
+    // test_vector_bool();
+    // test_vector();
+    // test_deque();
+    // test_string();
+    // test_queue();
+    // test_list();
+    // test_stack();
+    // test_set();
     test_map();
-    test_bitset();
-    test_hex();
-    undefined();
+    // test_bitset();
+    // test_hex();
+    // undefined();
     return 0;
 }
 
