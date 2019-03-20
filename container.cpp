@@ -1,9 +1,10 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
-#include <tuple>
+#include <functional>   // ref
 
 // container
+#include <tuple>
 #include <vector>
 #include <deque>
 #include <list>
@@ -17,6 +18,44 @@
 #include <queue>
 
 using namespace std;
+
+void test_tuple() {
+    tuple<uint32_t, uint32_t, uint32_t> p0 = make_tuple<uint32_t, uint32_t, uint32_t>(1,1,1);
+    tuple<uint32_t, uint32_t, uint32_t> p1 = make_tuple(1,1,1);
+    auto p2 = make_tuple<uint32_t, uint32_t, uint32_t>(1,1,1);
+    auto p3 = make_tuple(1,1,1);    // int, int, int
+
+    // c++17 auto decomposition declaration
+    auto [x,y,z] = p0;
+    cout << x << "," << y << "," << z << endl;      // 1,1,1
+    get<0>(p0) = 10;
+    cout << x << "," << y << "," << z << endl;      // 1,1,1
+    // unpack with ref
+    auto & [xr,yr,zr] = p0;
+    cout << xr << "," << yr << "," << zr << endl;   // 10,1,1
+    get<0>(p0) = 100;
+    cout << xr << "," << yr << "," << zr << endl;   // 100,1,1
+    // note
+    // uint32_t [x,y,z] = p0;   // decomposition declaration can not be used with type other than auto
+
+    // c++11 std::tie
+    uint32_t x1, y1, z1;
+    tie(x1, y1, z1) = p0;
+
+    // tuple can hold rvalue reference
+    int i = 100;
+    tuple<int&> rt1(i); // i taken by ref
+    get<0>(rt1) = 200;
+    cout << i << endl;  // 200
+
+    tuple<int> rt2(i);  // i taken by value
+    get<0>(rt2) = 300;
+    cout << i << endl;  // 200
+
+    tuple<int&> rt3(ref(i));    // i taken by ref
+    get<0>(rt3) = 400;
+    cout << i << endl;  // 400
+}
 
 void test_vector_bool() {
     // vector<bool> is overloaded template to store bool as 1bit
@@ -202,6 +241,7 @@ void test_hex() {
 }
 
 int main() {
+    test_tuple();
     // test_vector_bool();
     // test_vector();
     // test_deque();
@@ -210,7 +250,7 @@ int main() {
     // test_list();
     // test_stack();
     // test_set();
-    test_map();
+    // test_map();
     // test_bitset();
     // test_hex();
     // undefined();
