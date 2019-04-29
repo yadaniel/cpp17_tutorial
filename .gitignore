@@ -1,3 +1,4 @@
+*.exe
 *_gcc
 *_clang
 *.orig
