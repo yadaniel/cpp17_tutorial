@@ -8,11 +8,14 @@ CLANG = clang++
 CXXFLAGS += -Wshadow
 
 dirs := $(shell pwd)
-srcfiles := $(shell find $(dirs) -type f -iname "*.cpp" -exec basename {} ";")
+srcfiles := $(shell find $(dirs) -type f -iregex "\./[^_].*\.cpp" -exec basename {} ";")
+# srcfiles := $(shell find $(dirs) -type f -iname "*.cpp" -exec basename {} ";")
 objfiles := $(patsubst %.cpp, %.o, $(srcfiles))
 depfiles := $(patsubst %.cpp, %.d, $(srcfiles))
 
-srcs := $(wildcard *.cpp)
+# _*.cpp files are excluded
+# srcs := $(wildcard *.cpp)
+srcs := $(wildcard [^_]*.cpp)
 objs := $(srcs:.cpp=.o)
 deps := $(srcs:.cpp=.d)
 
